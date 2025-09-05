@@ -21,6 +21,15 @@
         android:text="Status: Inactive"
         android:textSize="18sp"
         android:gravity="center"
+        android:layout_marginBottom="16dp"/>
+    
+    <TextView
+        android:id="@+id/audioStatusText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Checking audio status..."
+        android:textSize="16sp"
+        android:gravity="center"
         android:layout_marginBottom="24dp"/>
     
     <Button
@@ -34,7 +43,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="This app will check media volume every 5 minutes\nand mute it if it's above 0"
+        android:text="This app will check media volume every 5 minutes\nand mute it if it's above 0 (when not using headphones/bluetooth)"
         android:textSize="14sp"
         android:gravity="center"
         android:layout_marginTop="32dp"
