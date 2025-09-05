@@ -1,6 +1,8 @@
-package com.example.keep_media_muted
+package com.example.keep_media_muted  // Update this to match your package name
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.os.Build
@@ -8,7 +10,9 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.work.*
 import java.util.concurrent.TimeUnit
 
@@ -19,6 +23,17 @@ class MainActivity : AppCompatActivity() {
     private var isServiceEnabled = false
     private lateinit var audioManager: AudioManager
     
+    // Notification permission launcher for Android 13+
+    private val notificationPermissionLauncher = 
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                Toast.makeText(this, "Notification permission granted", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Notifications disabled - you won't be notified when volume is muted", 
+                    Toast.LENGTH_LONG).show()
+            }
+        }
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -27,6 +42,9 @@ class MainActivity : AppCompatActivity() {
         toggleButton = findViewById(R.id.toggleButton)
         audioStatusText = findViewById(R.id.audioStatusText)
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        
+        // Check and request notification permission for Android 13+
+        checkNotificationPermission()
         
         // Check if service is already running
         isServiceEnabled = WorkManager.getInstance(this)
@@ -48,6 +66,30 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updateAudioStatus()
+    }
+    
+    private fun checkNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            when {
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED -> {
+                    // Permission already granted
+                }
+                shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
+                    // Show explanation before requesting
+                    Toast.makeText(this, 
+                        "Notification permission needed to inform you when volume is muted", 
+                        Toast.LENGTH_LONG).show()
+                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+                else -> {
+                    // Request permission
+                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+        }
     }
     
     private fun startVolumeMonitoring() {
