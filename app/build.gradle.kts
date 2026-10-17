@@ -5,14 +5,18 @@ plugins {
 
 android {
     namespace = "com.example.keep_media_muted"  // Update to match your package
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.keep_media_muted"  // Update to match your package
         minSdk = 26
+        // targetSdk intentionally kept < 37: on Android 17, apps targeting < 37 only need
+        // *a* foreground service for background volume changes. Targeting 37 would also
+        // require while-in-use capability, which a boot-restarted service does not get,
+        // breaking auto-mute after reboot.
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 3
+        versionName = "2.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -39,9 +43,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    
-    // Add WorkManager dependency - IMPORTANT!
-    implementation("androidx.work:work-runtime-ktx:2.9.0")
     
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
